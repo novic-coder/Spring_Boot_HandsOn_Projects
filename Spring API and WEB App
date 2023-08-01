@@ -1,0 +1,9 @@
+LECTURE 16
+--------------------
+
+API - Application Programming Interface
+--------------------------------------------
+
+Its set of rules that allows the programs to talk to each other 
+The developer create the API on the server and allows the client to talk to it.
+
