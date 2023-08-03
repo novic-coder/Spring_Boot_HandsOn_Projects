@@ -9,3 +9,222 @@ The developer create the API on the server and allows the client to talk to it.
 
 REST Api - representational State Transfer
 -----------------------------------------------
+
+- A set of containers to be used to create web services
+
+Important methods of HTTP are 
+
+GET - to read a resource
+PUT - to update a resource 
+POST - It creates a new resource
+DELETE - To delete a resource
+
+------------------------------------
+
+Create A Spring Boot Starter Project using the Following dependencies
+i. Web
+ii. Dev Tools 
+
+Main Class
+---------------------
+
+package com.Book.API;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class BookRestApiApplication {
+
+	public static void main(String[] args) {
+		SpringApplication.run(BookRestApiApplication.class, args);
+	}
+}
+
+
+---------------------------------------------------------------
+Controller class to control the requests 
+
+package com.Book.API.controller;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.Book.API.entities.Book;
+import com.Book.API.services.BookService;
+
+@RestController
+//@Controller
+public class BookController {
+	
+	//@RequestMapping(value= "/book", method = RequestMethod.GET)  -- Alternative method is GetMapping
+	//@ResponseBody -- When we dont have ResController annotation this should be used
+	
+	@Autowired
+	private BookService bookservice;
+	
+	@GetMapping("/book")
+	public List<Book> getBooks() {
+		return this.bookservice.getAllBooks();
+	}
+	
+	@GetMapping("/book/{id}")
+	public Book getBook(@PathVariable("id") int id){
+		return bookservice.getBookById(id);
+	}
+	
+	// Post Mapping to add the New book 
+	
+	@PostMapping("/book")
+	public Book addBook(@RequestBody Book book) {
+		Book n = this.bookservice.addBook(book);
+		return n;
+	}
+	
+	// Delete Mapping to delete a book with id
+	
+	@DeleteMapping("/book/{bookId}")
+	public void deleteBook(@PathVariable("bookId") int bookId) {
+		this.bookservice.deleteBook(bookId);
+	}
+}
+
+
+---------------------------------------------------------------------------
+
+Entity Class 
+-------
+
+package com.Book.API.entities;
+
+public class Book {
+	
+	private int id;
+	private String title;
+	private String author;
+	private double price;
+	
+	public Book(int id, String title, String author, double price) {
+		super();
+		this.id = id;
+		this.title = title;
+		this.author = author;
+		this.price = price;
+	}
+
+	public Book() {
+		super();
+		// TODO Auto-generated constructor stub
+	}
+
+	public int getId() {
+		return id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
+	}
+
+	public String getTitle() {
+		return title;
+	}
+
+	public void setTitle(String title) {
+		this.title = title;
+	}
+
+	public String getAuthor() {
+		return author;
+	}
+
+	public void setAuthor(String author) {
+		this.author = author;
+	}
+
+	public double getPrice() {
+		return price;
+	}
+
+	public void setPrice(double price) {
+		this.price = price;
+	}
+
+	@Override
+	public String toString() {
+		return "Book [id=" + id + ", title=" + title + ", author=" + author + ", price=" + price + "]";
+	}
+}
+
+-------------------------------------------------------------------------------------------
+
+Service class 
+
+package com.Book.API.services;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Component;
+
+import com.Book.API.entities.Book;
+
+@Component
+public class BookService {
+	
+	private static List<Book> list = new ArrayList<>();
+	
+	// Declaring book objects statically
+	static {
+		list.add(new Book(123, "The Vanderville Ghost", "Xyz", 350));
+		list.add(new Book(124, "Revolution 2020", "chetan Bhagat", 200));
+		list.add(new Book(12345, "Rich Dad Poor Dad", "Robert Kyosaki", 350));
+		list.add(new Book(1453, "Indias Biggest CoverUp", "Anuj Dhar", 600));	
+		
+	}
+	// Getting all the books from static list
+	public List<Book> getAllBooks(){
+		return list;
+	}
+	
+	// Getting book by a particular id
+	public Book getBookById(int id) {
+		try {
+			Book book = null;
+			book = list.stream().filter(e->e.getId()== id).findFirst().get();
+			return book;
+		}
+		catch(Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	// Adding the books
+	public Book addBook(Book book) {
+		list.add(book);
+		return book;
+	}
+
+	// Method to delete the book  using book id
+	
+	public void deleteBook(int bookId) {
+		list = list.stream().filter(book -> book.getId()!=bookId).
+				collect(Collectors.toList());
+	}
+
+}
+----------------------------------------------------------------------------------------
+
+
+
+
+
+
