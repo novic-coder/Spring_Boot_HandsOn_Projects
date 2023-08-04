@@ -224,7 +224,34 @@ public class BookService {
 ----------------------------------------------------------------------------------------
 
 
+Update Handler 
+-----------------------------------
+
+inside the controller class
+
+// Update the book with id 
+	@PutMapping("/books/{bookId}")
+	public Book updateBook(@RequestBody Book book,@PathVariable("bookId") int bookId) {
+		this.bookservice.updateBook(book,bookId);
+		return book;
+	}
 
 
+----------------------------------------------------------------
+
+Inside the Service class
+// Update the book 
+	public void updateBook(Book book, int bookId) {
+		list = list.stream().map(books->{
+			if(books.getId() == bookId) {
+				books.setTitle(book.getTitle());
+				books.setAuthor(book.getAuthor());
+				books.setPrice(book.getPrice());
+			}
+			return books;
+		}).collect(Collectors.toList());
+		}
+
+---------------------------------------------------------------------------------
 
 
