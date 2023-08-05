@@ -1,4 +1,4 @@
-LECTURE 16
+ LECTURE 16
 --------------------
 
 API - Application Programming Interface
@@ -254,4 +254,82 @@ Inside the Service class
 
 ---------------------------------------------------------------------------------
 
+Handeling HTTP request while creating REST API's
+
+Controller Class
+---------------------
+@GetMapping("/book")
+	public ResponseEntity<List<Book>> getBooks() {
+		List<Book> list = bookservice.getAllBooks();
+		if(list.size()<=0) {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+		}
+		return ResponseEntity.of(Optional.of(list));
+	}
+	
+	@GetMapping("/book/{id}")
+	public ResponseEntity<Book> getBook(@PathVariable("id") int id){
+		Book book = bookservice.getBookById(id);
+		if(book ==null) {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+		}
+		return ResponseEntity.of(Optional.of(book));
+	}
+	
+	// Post Mapping to add the New book 
+	
+	@PostMapping("/book")
+	public ResponseEntity<Book> addBook(@RequestBody Book book) {
+		Book b = null;
+		try {
+		b = this.bookservice.addBook(book);
+		System.out.println(book);
+		return ResponseEntity.of(Optional.of(b));
+		}catch(Exception e) {
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+		}
+	}
+	
+	// Delete Mapping to delete a book with id
+	
+	@DeleteMapping("/book/{bookId}")
+	public ResponseEntity<Void> deleteBook(@PathVariable("bookId") int bookId) {
+		try {
+		this.bookservice.deleteBook(bookId);
+		return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+		}catch(Exception e) {
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+		}
+	}
+	
+	// Update the book with id 
+	@PutMapping("/books/{bookId}")
+	public ResponseEntity<Book> updateBook(@RequestBody Book book,@PathVariable("bookId") int bookId) {
+		try {
+		this.bookservice.updateBook(book,bookId);
+		return ResponseEntity.ok().body(book);
+		}catch (Exception e) {
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+		}
+	}
+
+--------------------------------------------------------------------
+
+Service class 
+---------------------
+// Getting book by a particular id
+	public Book getBookById(int id) {
+		Book book = null;
+		try {
+			book = list.stream().filter(e->e.getId()== id).findFirst().get();
+		}
+		catch(Exception e) {
+			e.printStackTrace();
+		}
+		return book;
+	}
+	
 
