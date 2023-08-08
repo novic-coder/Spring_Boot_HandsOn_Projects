@@ -305,5 +305,246 @@ public class BookController {
 
 ------------------------------------------------------------
 
-Lecture 23 
+Lecture 23 End
 -----------------------------------
+
+
+
+Lecture 24  --> One on One Mapping 
+Mapping of Books with Another object 
+Lets say we have Author as an object which is an instance variable of Book clas
+--------------------------------
+
+
+Book.java
+-----------
+package com.Book.API.entities;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
+
+@Entity
+@Table(name="books")
+public class Book {
+	
+	@Id
+	@GeneratedValue(strategy=GenerationType.AUTO)
+	private int id;
+	private String title;
+	// one to one mapping annotation
+	//all the related operation will be performed automatically related to one to one mapping
+	@OneToOne(cascade = CascadeType.ALL)
+	private Author author;
+	private double price;
+	
+	public Book(int id, String title, Author author, double price) {
+		super();
+		this.id = id;
+		this.title = title;
+		this.author = author;
+		this.price = price;
+	}
+
+	public Book() {
+		super();
+		// TODO Auto-generated constructor stub
+	}
+
+	public int getId() {
+		return id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
+	}
+
+	public String getTitle() {
+		return title;
+	}
+
+	public void setTitle(String title) {
+		this.title = title;
+	}
+
+	public Author getAuthor() {
+		return author;
+	}
+
+	public void setAuthor(Author author) {
+		this.author = author;
+	}
+
+	public double getPrice() {
+		return price;
+	}
+
+	public void setPrice(double price) {
+		this.price = price;
+	}
+
+	@Override
+	public String toString() {
+		return "Book [id=" + id + ", title=" + title + ", author=" + author + ", price=" + price + "]";
+	}
+}
+
+
+
+
+Create a new Author class in entity package 
+Inside the class we need to give annotation for entity and Auto generation so that it can make table in databases with id 
+--------------------------------------------------------------------------
+package com.Book.API.entities;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+
+@Entity
+public class Author {
+	
+	@Id
+	@GeneratedValue(strategy = GenerationType.AUTO)
+	private int authorId;
+	private String firstName;
+	private String lastName;
+	private String language;
+	private String country;
+	
+	public Author() {
+		super();
+		// TODO Auto-generated constructor stub
+	}
+
+	public Author(int authorId, String firstName, String lastName, String language, String country) {
+		super();
+		this.authorId = authorId;
+		this.firstName = firstName;
+		this.lastName = lastName;
+		this.language = language;
+		this.country = country;
+	}
+
+	public int getAuthorId() {
+		return authorId;
+	}
+
+	public void setAuthorId(int authorId) {
+		this.authorId = authorId;
+	}
+
+	public String getFirstName() {
+		return firstName;
+	}
+
+	public void setFirstName(String firstName) {
+		this.firstName = firstName;
+	}
+
+	public String getLastName() {
+		return lastName;
+	}
+
+	public void setLastName(String lastName) {
+		this.lastName = lastName;
+	}
+
+	public String getLanguage() {
+		return language;
+	}
+
+	public void setLanguage(String language) {
+		this.language = language;
+	}
+
+	public String getCountry() {
+		return country;
+	}
+
+	public void setCountry(String country) {
+		this.country = country;
+	}
+	
+}
+
+
+
+
+Rest change will be same 
+-----------------------------------------------------------------
+Now we will make the API call 
+
+http://localhost:8100/book
+
+{
+"id": "12234",
+"title": "Rich Dad Poor Dad",
+  "author": {
+    "authorId" : "656",
+    "firstName" : "Robert",
+    "lastName" : "Kiyosaki",
+    "language" : "English",
+    "country" : "America"
+  },
+"price": 400.0
+}
+
+
+It should be adding the data both for Books table and the Author table 
+------------------------------------------------------------------------------------------------------------
+
+
+
+
+Lecture 25
+-------------------------------------------
+Bidirectional  Mapping 
+-----------------------------------------------------------
+
+We will require to do bidirectional mapping from Book ----> Author or Author ----> Book
+
+Inside the Autor.java
+
+@OneToOne(mappedBy ="author")
+	private Book book;
+
+ Generate Getter and Setters
+
+ public Book getBook() {
+		return book;
+	}
+
+	public void setBook(Book book) {
+		this.book = book;
+	}
+
+ -----------------------------------------------------------
+
+ When the Api Will be hit to get the book it will give infinite results because book will call author and author will call book and so on 
+
+
+ In order to resolve this we will require to use 
+
+ @JsonManagedReference -- Parent file 
+ @JsonBackReference ---- Child file 
+
+Book.java
+-------------------------
+ @JsonManagedReference
+	@OneToOne(cascade = CascadeType.ALL)
+	private Author author;
+
+Author.java
+--------------------------
+
+@JsonBackReference
+	@OneToOne(mappedBy ="author")
+	private Book book;
+
+
+ The above changes will be solving the problem 
