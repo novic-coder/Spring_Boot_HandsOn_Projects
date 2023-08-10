@@ -548,3 +548,145 @@ Author.java
 
 
  The above changes will be solving the problem 
+
+
+ Uploading Images and Storing it on server side
+ -------------------------------------------------------------
+
+ In this Exercise we will be Taking a tour to how we can add the Image to server side statically and Dynamically
+
+ Create ImageHandler Controller 
+ ----------------------------------------
+
+ package com.Book.API.controller;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
+import com.Book.API.helper.FileUploadHelper;
+
+@RestController
+public class ImageUploadController {
+	
+	@Autowired
+	private FileUploadHelper helper;
+	
+	@PostMapping("/upload-image")
+	public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile file)
+	{
+		System.out.println(file.getOriginalFilename());
+		System.out.println(file.getSize());
+		System.out.println(file.getContentType());
+		System.out.println(file.getName());
+		
+		
+		try {
+		
+			if(file.isEmpty()) {
+				return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Request must contain a file");
+			}
+			
+			if(!file.getContentType().equals("image/jpeg")) {
+				return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Only JPEJ files are allowed");
+			}
+			 // File Upload case
+			boolean f = helper.uploadStatus(file);
+			if(f) {
+				return ResponseEntity.ok("File is uploaded Successfully");
+			}
+			
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
+			
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Something went Wrong");
+	}
+}
+
+----------------------------------------
+
+File Uploader Helper
+-------------------------------------
+
+package com.Book.API.helper;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
+
+@Component
+public class FileUploadHelper {
+
+	// Path where images will get stored  - String because we do not want to change the location
+	public final String UPLOAD_DIR="E:\\SpringBootBYDurgesh\\bookRestApi\\src\\main\\resources\\static\\image"
+	
+	public FileUploadHelper()throws IOException{
+		
+	}
+	
+	public boolean uploadStatus(MultipartFile uploadedFile) {
+		
+		boolean file = false;
+		
+		try {
+			
+			/*
+			 * // Input Stream InputStream stream = uploadedFile.getInputStream(); byte data
+			 * [] = new byte[stream.available()]; stream.read(data);
+			 * 
+			 * // FIle Output Stream FileOutputStream fos = new
+			 * FileOutputStream(UPLOAD_DIR+File.separator+uploadedFile.getOriginalFilename()
+			 * ); fos.write(data);
+			 * 
+			 * fos.flush(); fos.close(); file = true;
+			 */
+			
+			// Using NIOS  input stream , path to get and standard option - 3 arguments 
+			Files.copy(uploadedFile.getInputStream(),Paths.get(UPLOAD_DIR+File.separator+uploadedFile.getOriginalFilename()), StandardCopyOption.REPLACE_EXISTING);
+			file = true;
+			
+		}catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+		return file;
+	}
+	
+}
+
+
+With the help of above code we will be able to put the images in the Static Folder
+
+
+
+Dynamic Implementation
+-------------------------------------
+
+Inside the controller file 
+
+we need to add and display the image dynamically 
+
+if(f) {
+				//return ResponseEntity.ok("File is uploaded Successfully");
+				
+				return ResponseEntity.ok(ServletUriComponentsBuilder.fromCurrentContextPath().path("/image/").path(file.getOriginalFilename()).toUriString());
+			}
+
+
+   Image Handeler
+
+   
+	//Dynamic path - Class path Resource - serves the class path
+	public final String UPLOAD_DIR=new ClassPathResource("static/image/").getFile().getAbsolutePath();
